@@ -1,4 +1,7 @@
 #coding:utf-8
+"""
+http://blog.jobbole.com/21351/
+"""
 class ObjectCreator(object):
     pass
 
