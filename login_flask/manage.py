@@ -3,7 +3,7 @@
 
 from flask import Flask
 from flask import request
-from flask.ext.login import fresh_login_required, login_user, logout_user, current_user, LoginManager
+from flask.ext.login import  login_required, fresh_login_required, login_user, logout_user, current_user, LoginManager
 from user import get_user, get_anonymous
 
 app = Flask(__name__)
@@ -19,11 +19,11 @@ def _user_loader(userid):
     return get_user(userid)    # 向flask-login 提交自定义User
 
 
-@app.route('/wjh_flask/login', methods=['GET', 'POST'])
+@app.route('/wjh_flask/login', methods=['GET'])
 def login():
-    if current_user.get_id():
+    uin = request.args.get('uin', -1)
+    if current_user.get_id() and current_user.get_id()==uin:
         return ' repeat login!'
-    uin = request.json.get('uin', -1)
     try:
         login_user(get_user(uin), remember=True)
     except Exception:
@@ -31,7 +31,7 @@ def login():
     return 'login succeed!'
 
 
-@app.route('/wjh_flask/query', methods=['GET', 'POST'])   # 登录才能查询
+@app.route('/wjh_flask/query', methods=['GET'])   # 登录才能查询
 @fresh_login_required
 def query():
     if current_user.get_id():
@@ -40,7 +40,7 @@ def query():
     return 'anonymous ,not authenticated. please login!'
 
 
-@app.route('/wjh_flask/query_anonymous', methods=['GET', 'POST'])   # 不登录也能查询
+@app.route('/wjh_flask/query_anonymous', methods=['GET'])   # 不登录也能查询
 def query_anonymous():
     if current_user.is_anonymous():
         return 'anonymous query succeed!'
@@ -53,10 +53,11 @@ def edit():
     return 'edit succeed!'
 
 
-@app.route('/wjh_flask/logout', methods=['GET', 'POST'])
-@fresh_login_required
+@app.route('/wjh_flask/logout', methods=['GET'])
+@login_required  # fresh_login_required 会清空所有的登陆用户
 def logout():
-    logout_user()
+    logout_user()  # Logs a user out. (You do not need to pass the actual user.) This will
+                   #  also clean up the remember me cookie if it exists.
     return 'logout succeed!'
 
 
