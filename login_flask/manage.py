@@ -19,9 +19,12 @@ def _user_loader(userid):
     return get_user(userid)    # 向flask-login 提交自定义User
 
 
-@app.route('/wjh_flask/login', methods=['GET'])
+@app.route('/wjh_flask/login', methods=['GET', 'POST'])
 def login():
-    uin = request.args.get('uin', -1)
+    if request.method == "GET":
+        uin = request.args.get('uin', -1)
+    else:
+        uin = request.json.get('uin') or request.form.get('uin')
     if current_user.get_id() and current_user.get_id()==uin:
         return ' repeat login!'
     try:
@@ -31,7 +34,7 @@ def login():
     return 'login succeed!'
 
 
-@app.route('/wjh_flask/query', methods=['GET'])   # 登录才能查询
+@app.route('/wjh_flask/query', methods=['GET', 'POST'])   # 登录才能查询
 @fresh_login_required
 def query():
     if current_user.get_id():
@@ -40,20 +43,20 @@ def query():
     return 'anonymous ,not authenticated. please login!'
 
 
-@app.route('/wjh_flask/query_anonymous', methods=['GET'])   # 不登录也能查询
+@app.route('/wjh_flask/query_anonymous', methods=['GET', 'POST'])   # 不登录也能查询
 def query_anonymous():
     if current_user.is_anonymous():
         return 'anonymous query succeed!'
     return 'query error...'
 
 
-@app.route('/wjh_flask/edit', methods=['POST'])   # 登录才能编辑
+@app.route('/wjh_flask/edit', methods=['GET', 'POST'])   # 登录才能编辑
 @fresh_login_required
 def edit():
     return 'edit succeed!'
 
 
-@app.route('/wjh_flask/logout', methods=['GET'])
+@app.route('/wjh_flask/logout', methods=['GET', 'POST'])
 @login_required  # fresh_login_required 会清空所有的登陆用户
 def logout():
     logout_user()  # Logs a user out. (You do not need to pass the actual user.) This will
